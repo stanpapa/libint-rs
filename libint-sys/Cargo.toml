@@ -1,0 +1,19 @@
+[package]
+name = "libint-sys"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+edition.workspace = true
+license-file.workspace = true
+repository.workspace = true
+
+[dependencies]
+cxx = { workspace = true }
+# libint-src = { workspace = true, features = ["system"] }
+libint-src = { workspace = true, features = ["system", "static"] }
+
+[build-dependencies]
+cxx-build = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,23 @@
+[package]
+name = "libint-src"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+edition.workspace = true
+license-file.workspace = true
+repository.workspace = true
+links = "libint2"
+
+[features]
+default = []
+static = []
+system = []
+
+
+[dependencies]
+
+[build-dependencies]
+pkg-config.workspace = true
+
+[lints]
+workspace = true
