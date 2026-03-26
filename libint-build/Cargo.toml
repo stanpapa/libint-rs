@@ -1,0 +1,13 @@
+[package]
+name = "libint-build"
+version.workspace = true
+authors.workspace = true
+description.workspace = true
+edition.workspace = true
+license-file.workspace = true
+repository.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true
