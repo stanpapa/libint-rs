@@ -30,13 +30,15 @@
             pkg-config
             meson
             ninja
-            cmake
             # (libint.override { enableFortran = false; })
+            boost
+            eigen
             libint
 
             # Compilers / toolchain
             gfortran
             toolchain
+            llvmPackages.bintools
           ];
 
           buildInputs = with pkgs; [

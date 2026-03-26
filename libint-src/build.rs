@@ -9,21 +9,33 @@ fn main() {
     }
 
     if feature_enabled("system") {
-        // use pkg-config to find libint2
-        match pkg_config::Config::new()
+        let lib = pkg_config::Config::new()
             .statik(feature_enabled("static"))
+            .cargo_metadata(false)
             .probe("libint2")
-        {
-            Ok(_) => (),
-            Err(e) => panic!("{e}"),
+            .unwrap();
+
+        // Forward include paths to -sys crate
+        for path in &lib.include_paths {
+            println!("cargo:include={}", path.display());
         }
+
+        // // Emit lib search paths
+        for path in &lib.link_paths {
+            println!("cargo:rustc-link-search=native={}", path.display());
+        }
+
+        // Let pkg_config handle all other dependencies normally (Boost, Eigen, etc.)
+        // pkg_config::Config::new()
+        //     .probe("eigen3")
+        //     .unwrap()
+        //     .include_paths
+        //     .iter()
+        //     .for_each(|path| {
+        //         println!("cargo:include={}", path.display());
+        //     });
+        // pkg_config::Config::new().probe("boost").unwrap();
     } else {
         todo!("libint-build")
     }
-
-    // if feature_enabled("static") {
-    //     println!("cargo:rustc-link-arg=-Wl,--whole-archive");
-    //     println!("cargo:rustc-link-arg=-Wl,-llibint2");
-    //     println!("cargo:rustc-link-arg=-Wl,--no-whole-archive");
-    // }
 }

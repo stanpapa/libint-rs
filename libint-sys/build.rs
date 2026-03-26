@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 fn build_cpp_bindings() {
     // define list of bridges
     // it is assumed that all bridges are defined in bridge/{bridge}.rs
@@ -28,8 +30,18 @@ fn build_cpp_bindings() {
         println!("cargo:rerun-if-changed={}", header.to_str().unwrap());
     }
 
+    let includes = match std::env::var("DEP_INT2_INCLUDE") {
+        Ok(s) => std::env::split_paths(&s).collect::<Vec<PathBuf>>(),
+        Err(_) => todo!(),
+    };
+    // Link args must be emitted here, not in -src
+    println!("cargo:rustc-link-arg=-Wl,--start-group");
+    println!("cargo:rustc-link-arg=-Wl,-Bstatic,-lint2");
+    println!("cargo:rustc-link-arg=-Wl,--end-group");
     cxx_build::bridges(bridges.map(|bridge| format!("src/bridge/{bridge}.rs")))
         .files(sources)
+        .includes(includes)
+        .std("c++17")
         .compile("libint-sys");
 
     for bridge in bridges {
