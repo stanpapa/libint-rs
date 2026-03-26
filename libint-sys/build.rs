@@ -1,10 +1,11 @@
 use std::path::PathBuf;
 
-fn build_cpp_bindings() {
+fn build() {
     // define list of bridges
     // it is assumed that all bridges are defined in bridge/{bridge}.rs
     let bridges = ["atom", "initialize", "shell"];
 
+    // collect shims
     let shim_root = std::path::PathBuf::from("shim");
     let dir = std::fs::read_dir(shim_root.join("src")).unwrap();
     let sources = dir
@@ -21,6 +22,7 @@ fn build_cpp_bindings() {
         })
         .collect::<Vec<_>>();
 
+    // re-compile if one of the shims or bridges has changed
     for cc in &sources {
         println!("cargo:rerun-if-changed={}", cc.to_str().unwrap());
 
@@ -30,25 +32,29 @@ fn build_cpp_bindings() {
         println!("cargo:rerun-if-changed={}", header.to_str().unwrap());
     }
 
+    for bridge in bridges {
+        println!("cargo:rerun-if-changed=src/bridge/{bridge}.rs");
+    }
+
+    // parse include paths passed from `libint-src`
     let includes = match std::env::var("DEP_INT2_INCLUDE") {
         Ok(s) => std::env::split_paths(&s).collect::<Vec<PathBuf>>(),
-        Err(_) => todo!(),
+        Err(e) => panic!("{e}"),
     };
-    // Link args must be emitted here, not in -src
+
+    // link libint, so libint_static_init will be found
     println!("cargo:rustc-link-arg=-Wl,--start-group");
     println!("cargo:rustc-link-arg=-Wl,-Bstatic,-lint2");
     println!("cargo:rustc-link-arg=-Wl,--end-group");
+
+    // compile bridge
     cxx_build::bridges(bridges.map(|bridge| format!("src/bridge/{bridge}.rs")))
         .files(sources)
         .includes(includes)
         .std("c++17")
         .compile("libint-sys");
-
-    for bridge in bridges {
-        println!("cargo:rerun-if-changed=src/bridge/{bridge}.rs");
-    }
 }
 
 fn main() {
-    build_cpp_bindings();
+    build();
 }

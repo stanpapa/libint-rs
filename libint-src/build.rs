@@ -15,12 +15,12 @@ fn main() {
             .probe("libint2")
             .unwrap();
 
-        // Forward include paths to -sys crate
+        // forward include paths to -sys crate
         for path in &lib.include_paths {
             println!("cargo:include={}", path.display());
         }
 
-        // // Emit lib search paths
+        // emit lib search paths
         for path in &lib.link_paths {
             println!("cargo:rustc-link-search=native={}", path.display());
         }
