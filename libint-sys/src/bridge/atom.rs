@@ -6,13 +6,17 @@ pub mod ffi {
 
         type Atom;
 
-        // fn atom_value() -> Atom;
+        #[must_use]
         fn atom(atomic_number: i32, x: f64, y: f64, z: f64) -> UniquePtr<Atom>;
 
         // getters
+        #[must_use]
         fn atomic_number(atom: Pin<&Atom>) -> i32;
+        #[must_use]
         fn x(atom: Pin<&Atom>) -> f64;
+        #[must_use]
         fn y(atom: Pin<&Atom>) -> f64;
+        #[must_use]
         fn z(atom: Pin<&Atom>) -> f64;
 
         // fn read_dotxyz(is: &str, bohr_to_angstrom: f64) -> CxxVector<Atom>;

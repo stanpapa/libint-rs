@@ -30,13 +30,12 @@
             pkg-config
             meson
             ninja
-            # (libint.override { enableFortran = false; })
             boost
             eigen
             libint
+            # (libint.override { enableFortran = false; eriDeriv = 0; eri2Deriv = 0; eri3Deriv = 0; enableOneBody = true; multipoleOrd = 0; enableGeneric = false; })
 
             # Compilers / toolchain
-            gfortran
             toolchain
             llvmPackages.bintools
           ];
@@ -45,12 +44,9 @@
             cargo-expand
             cargo-release
             clang-tools
-            openssl
           ];
 
           NIX_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
-            pkgs.gfortran.cc
-            pkgs.openssl
             pkgs.stdenv.cc.cc
           ];
 

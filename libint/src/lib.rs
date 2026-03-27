@@ -1,6 +1,8 @@
 mod atom;
+mod utils;
 
-pub use libint_sys::libint::{finalize, initialize};
+pub use atom::Atom;
+pub use libint_sys::initialize::{finalize, initialize};
 
 // #[cfg(test)]
 // mod tests {

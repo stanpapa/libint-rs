@@ -7,8 +7,10 @@ pub mod ffi {
         type Shell;
 
         #[Self = "Shell"]
+        #[must_use]
         fn am_symbol(l: usize) -> c_char;
         #[Self = "Shell"]
+        #[must_use]
         fn am_symbol_to_l(am_symbol: c_char) -> u16;
     }
 }
