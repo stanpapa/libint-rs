@@ -43,6 +43,7 @@ fn build() {
     };
 
     // link libint, so libint_static_init will be found
+    // TODO: figure out dynamic linking
     println!("cargo:rustc-link-arg=-Wl,--start-group");
     println!("cargo:rustc-link-arg=-Wl,-Bstatic,-lint2");
     println!("cargo:rustc-link-arg=-Wl,--end-group");

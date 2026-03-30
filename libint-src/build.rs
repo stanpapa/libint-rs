@@ -26,14 +26,14 @@ fn main() {
         }
 
         // Let pkg_config handle all other dependencies normally (Boost, Eigen, etc.)
-        // pkg_config::Config::new()
-        //     .probe("eigen3")
-        //     .unwrap()
-        //     .include_paths
-        //     .iter()
-        //     .for_each(|path| {
-        //         println!("cargo:include={}", path.display());
-        //     });
+        pkg_config::Config::new()
+            .probe("eigen3")
+            .unwrap()
+            .include_paths
+            .iter()
+            .for_each(|path| {
+                println!("cargo:include={}", path.display());
+            });
         // pkg_config::Config::new().probe("boost").unwrap();
     } else {
         todo!("libint-build")

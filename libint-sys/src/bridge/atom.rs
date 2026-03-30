@@ -1,6 +1,7 @@
+use cxx::{CxxString, CxxVector, UniquePtr};
+
 #[cxx::bridge(namespace = "libint2")]
 pub mod ffi {
-
     unsafe extern "C++" {
         include!("libint-sys/shim/include/atom.h");
 
@@ -18,8 +19,6 @@ pub mod ffi {
         fn y(atom: Pin<&Atom>) -> f64;
         #[must_use]
         fn z(atom: Pin<&Atom>) -> f64;
-
-        // fn read_dotxyz(is: &str, bohr_to_angstrom: f64) -> CxxVector<Atom>;
     }
 }
 
@@ -27,24 +26,28 @@ pub mod ffi {
 mod tests {
     use std::pin::Pin;
 
+    use cxx::let_cxx_string;
+
+    use super::ffi;
+
     #[test]
     #[allow(clippy::float_cmp)]
     fn atom() {
-        let atom = super::ffi::atom(1, 0., 1., 2.);
+        let atom = ffi::atom(1, 0., 1., 2.);
         assert_eq!(
-            unsafe { super::ffi::atomic_number(Pin::new_unchecked(atom.as_ref().unwrap())) },
+            unsafe { ffi::atomic_number(Pin::new_unchecked(atom.as_ref().unwrap())) },
             1
         );
         assert_eq!(
-            unsafe { super::ffi::x(Pin::new_unchecked(atom.as_ref().unwrap())) },
+            unsafe { ffi::x(Pin::new_unchecked(atom.as_ref().unwrap())) },
             0.
         );
         assert_eq!(
-            unsafe { super::ffi::y(Pin::new_unchecked(atom.as_ref().unwrap())) },
+            unsafe { ffi::y(Pin::new_unchecked(atom.as_ref().unwrap())) },
             1.
         );
         assert_eq!(
-            unsafe { super::ffi::z(Pin::new_unchecked(atom.as_ref().unwrap())) },
+            unsafe { ffi::z(Pin::new_unchecked(atom.as_ref().unwrap())) },
             2.
         );
     }

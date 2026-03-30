@@ -3,12 +3,14 @@ resolver = "3"
 members = ["libint", "libint-build", "libint-src", "libint-sys"]
 
 [workspace.dependencies]
+approx = "0.5.1"
 cxx = "1.0.194"
 cxx-build = "1.0.194"
 libint-build = { version = "0.1.0", path = "libint-build" }
 libint-src = { version = "0.1.0", path = "libint-src" }
 libint-sys = { version = "0.1.0", path = "libint-sys" }
 pkg-config = "0.3.32"
+thiserror = "2.0.18"
 
 [workspace.package]
 version = "0.1.0"

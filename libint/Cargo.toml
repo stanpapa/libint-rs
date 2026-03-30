@@ -8,7 +8,9 @@ license-file.workspace = true
 repository.workspace = true
 
 [dependencies]
+approx.workspace = true
 libint-sys = { workspace = true }
+thiserror.workspace = true
 
 [lints]
 workspace = true

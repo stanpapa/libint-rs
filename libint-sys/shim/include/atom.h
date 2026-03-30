@@ -12,5 +12,7 @@ namespace libint2 {
   double x(const Atom& atom);  
   double y(const Atom& atom);  
   double z(const Atom& atom);  
+
+  // std::unique_ptr<std::vector<Atom>> read_dotxyz(const std::string& is);
 }
 

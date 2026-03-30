@@ -1,4 +1,5 @@
 #include "libint-sys/shim/include/atom.h"
+#include <sstream>
 
 namespace libint2 {
   std::unique_ptr<Atom> atom(const int atomic_number, const double x, const double y, const double z) {
@@ -16,7 +17,13 @@ namespace libint2 {
   double y(const Atom& atom) {
     return atom.y;
   }  
+
   double z(const Atom& atom) {
     return atom.z;
   }  
+  
+  // std::unique_ptr<std::vector<Atom>> read_dotxyz(const std::string& is) {
+  //   std::istringstream stream(is);
+  //   return std::make_unique<std::vector<Atom>>(read_dotxyz(stream));
+  // }
 }
