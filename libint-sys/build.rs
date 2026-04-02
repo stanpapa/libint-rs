@@ -3,7 +3,7 @@ use std::path::PathBuf;
 fn build() {
     // define list of bridges
     // it is assumed that all bridges are defined in bridge/{bridge}.rs
-    let bridges = ["atom", "initialize", "shell"];
+    let bridges = ["atom", "basis", "initialize", "shell"];
 
     // collect shims
     let shim_root = std::path::PathBuf::from("shim");
@@ -44,9 +44,7 @@ fn build() {
 
     // link libint, so libint_static_init will be found
     // TODO: figure out dynamic linking
-    println!("cargo:rustc-link-arg=-Wl,--start-group");
-    println!("cargo:rustc-link-arg=-Wl,-Bstatic,-lint2");
-    println!("cargo:rustc-link-arg=-Wl,--end-group");
+    println!("cargo:rustc-link-lib=static:+whole-archive=int2");
 
     // compile bridge
     cxx_build::bridges(bridges.map(|bridge| format!("src/bridge/{bridge}.rs")))

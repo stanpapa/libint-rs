@@ -26,8 +26,6 @@ pub mod ffi {
 mod tests {
     use std::pin::Pin;
 
-    use cxx::let_cxx_string;
-
     use super::ffi;
 
     #[test]

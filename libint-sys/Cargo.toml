@@ -9,7 +9,6 @@ repository.workspace = true
 
 [dependencies]
 cxx = { workspace = true }
-# libint-src = { workspace = true, features = ["system"] }
 libint-src = { workspace = true, features = ["system", "static"] }
 
 [build-dependencies]

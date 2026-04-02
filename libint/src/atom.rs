@@ -7,7 +7,7 @@ use crate::{
     utils::AsPin,
 };
 
-pub struct Atom(UniquePtr<ffi::Atom>);
+pub struct Atom(pub(crate) UniquePtr<ffi::Atom>);
 
 impl AsPin for Atom {
     type T = ffi::Atom;
@@ -64,6 +64,7 @@ impl Debug for Atom {
             .finish()
     }
 }
+
 impl PartialEq for Atom {
     fn eq(&self, other: &Self) -> bool {
         self.atomic_number() == other.atomic_number()
@@ -114,6 +115,10 @@ impl Atom {
     #[must_use]
     pub fn z(&self) -> f64 {
         ffi::z(self.as_pin())
+    }
+
+    pub(crate) fn as_ptr(&self) -> *const ffi::Atom {
+        self.0.as_ptr()
     }
 }
 

@@ -1,5 +1,5 @@
 pub(crate) mod atom;
-// mod basis_set;
+pub(crate) mod basis;
 // mod engine;
 pub(crate) mod initialize;
 pub(crate) mod shell;
