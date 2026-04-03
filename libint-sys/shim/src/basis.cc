@@ -16,4 +16,21 @@ namespace libint2 {
     // construct `BasisSet` and return
     return std::make_unique<BasisSet>(s, tmp);
   }
+
+  std::size_t nshells(const BasisSet& basis) {
+    return basis.size();
+  }
+
+  const Shell* const* contr(const BasisSet& basis) {
+    // convert vector<Shell> to vector<const* Shell>
+    std::vector<const Shell*> ptrs;
+    ptrs.reserve(basis.size());
+    for (const auto& shell : basis.shells()) {
+      ptrs.push_back(&shell);
+    }
+
+    // convert vector to pointer array
+    const Shell* const* array = ptrs.data();
+    return array;
+  }
 }

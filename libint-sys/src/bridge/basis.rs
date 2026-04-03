@@ -6,6 +6,7 @@ pub mod ffi {
 
         type BasisSet;
         type Atom = crate::atom::Atom;
+        type Shell = crate::shell::Shell;
 
         /// # Safety
         ///
@@ -13,6 +14,9 @@ pub mod ffi {
         /// This leads to C++ interpreting the pointers as garbage.
         #[must_use]
         unsafe fn basis(name: &str, atoms: *const *const Atom, n: usize) -> UniquePtr<BasisSet>;
+
+        fn nshells(basis: Pin<&BasisSet>) -> usize;
+        fn shells(basis: Pin<&BasisSet>) -> *const *const Shell;
     }
 }
 

@@ -7,5 +7,8 @@
 
 namespace libint2 {
   std::unique_ptr<BasisSet> basis(rust::Str name, const Atom* const* atoms, std::size_t n);
-}
 
+  std::size_t nshells(const BasisSet& basis);
+
+  const Shell* const* shells(const BasisSet& basis);
+}
