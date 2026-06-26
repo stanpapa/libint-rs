@@ -1,8 +1,8 @@
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut, Index};
 
 use libint_sys::{UniquePtr, basis as ffi};
 
-use crate::Atom;
+use crate::{Atom, Shell};
 
 pub struct BasisSet(UniquePtr<ffi::BasisSet>);
 
@@ -21,8 +21,33 @@ impl BasisSet {
     }
 
     #[must_use]
-    pub fn size(&self) -> usize {
+    pub fn len(&self) -> usize {
         ffi::nshells(self)
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    pub fn at(&self, i: usize) -> Shell {
+        Shell::from(ffi::at(self, i))
+    }
+
+    pub fn set_pure(&mut self, solid: bool) {
+        ffi::set_pure(self.0.pin_mut(), solid);
+    }
+
+    pub fn nbf(basis: &BasisSet) -> usize {
+        ffi::nbf(basis)
+    }
+
+    pub fn max_nprim(basis: &BasisSet) -> usize {
+        ffi::max_nprim(basis)
+    }
+
+    pub fn max_l(basis: &BasisSet) -> usize {
+        ffi::max_l(basis)
     }
 }
 
@@ -38,6 +63,6 @@ H   0.7920   0.0000  -0.4973
     ";
         let atoms = crate::atom::read_dotxyz_str(xyz).unwrap();
         let basis = super::BasisSet::new("def2-SVP", &atoms);
-        assert_eq!(basis.size(), 12);
+        assert_eq!(basis.len(), 12);
     }
 }

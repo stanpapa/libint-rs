@@ -32,6 +32,12 @@ impl PartialEq for Shell {
     }
 }
 
+impl From<UniquePtr<ffi::Shell>> for Shell {
+    fn from(value: UniquePtr<ffi::Shell>) -> Self {
+        Self(value)
+    }
+}
+
 impl Shell {
     fn alpha(&self) -> Vec<f64> {
         ffi::alpha(self)

@@ -11,4 +11,19 @@ namespace libint2 {
   std::size_t nshells(const BasisSet& basis);
 
   const Shell* const* shells(const BasisSet& basis);
+
+  std::unique_ptr<Shell> at(const BasisSet& basis, std::size_t i);
+
+  void set_pure(BasisSet& basis, bool solid);
+  
+  std::unique_ptr<Shell> at(const BasisSet& basis, std::size_t i);
+
+  std::size_t nbf(const BasisSet& basis);
+  
+
+  std::size_t max_nprim(const BasisSet& basis);
+  
+
+  std::size_t max_l(const BasisSet& basis);
+  
 }
