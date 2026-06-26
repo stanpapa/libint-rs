@@ -1,4 +1,4 @@
-use cxx::{CxxString, CxxVector, UniquePtr};
+use cxx::UniquePtr;
 
 #[cxx::bridge(namespace = "libint2")]
 pub mod ffi {
@@ -12,41 +12,27 @@ pub mod ffi {
 
         // getters
         #[must_use]
-        fn atomic_number(atom: Pin<&Atom>) -> i32;
+        fn atomic_number(atom: &Atom) -> i32;
         #[must_use]
-        fn x(atom: Pin<&Atom>) -> f64;
+        fn x(atom: &Atom) -> f64;
         #[must_use]
-        fn y(atom: Pin<&Atom>) -> f64;
+        fn y(atom: &Atom) -> f64;
         #[must_use]
-        fn z(atom: Pin<&Atom>) -> f64;
+        fn z(atom: &Atom) -> f64;
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::pin::Pin;
-
     use super::ffi;
 
     #[test]
     #[allow(clippy::float_cmp)]
     fn atom() {
         let atom = ffi::atom(1, 0., 1., 2.);
-        assert_eq!(
-            unsafe { ffi::atomic_number(Pin::new_unchecked(atom.as_ref().unwrap())) },
-            1
-        );
-        assert_eq!(
-            unsafe { ffi::x(Pin::new_unchecked(atom.as_ref().unwrap())) },
-            0.
-        );
-        assert_eq!(
-            unsafe { ffi::y(Pin::new_unchecked(atom.as_ref().unwrap())) },
-            1.
-        );
-        assert_eq!(
-            unsafe { ffi::z(Pin::new_unchecked(atom.as_ref().unwrap())) },
-            2.
-        );
+        assert_eq!(ffi::atomic_number(&atom), 1);
+        assert_eq!(ffi::x(&atom), 0.);
+        assert_eq!(ffi::y(&atom), 1.);
+        assert_eq!(ffi::z(&atom), 2.);
     }
 }

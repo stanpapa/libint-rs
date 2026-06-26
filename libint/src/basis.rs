@@ -1,16 +1,16 @@
-use std::pin::Pin;
+use std::ops::Deref;
 
 use libint_sys::{UniquePtr, basis as ffi};
 
-use crate::{Atom, utils::AsPin};
+use crate::Atom;
 
 pub struct BasisSet(UniquePtr<ffi::BasisSet>);
 
-impl AsPin for BasisSet {
-    type T = ffi::BasisSet;
+impl Deref for BasisSet {
+    type Target = UniquePtr<ffi::BasisSet>;
 
-    fn as_pin(&self) -> Pin<&Self::T> {
-        unsafe { Pin::new_unchecked(self.0.as_ref().unwrap()) }
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -20,8 +20,9 @@ impl BasisSet {
         Self(unsafe { ffi::basis(name, ptrs.as_ptr(), ptrs.len()) })
     }
 
+    #[must_use]
     pub fn size(&self) -> usize {
-        ffi::nshells(self.as_pin())
+        ffi::nshells(self)
     }
 }
 

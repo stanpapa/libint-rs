@@ -1,19 +1,16 @@
-use std::{fmt::Debug, num::ParseFloatError, pin::Pin, str::FromStr};
+use std::{fmt::Debug, num::ParseFloatError, ops::Deref, str::FromStr};
 
 use libint_sys::{UniquePtr, atom as ffi};
 
-use crate::{
-    element::{Element, ElementError},
-    utils::AsPin,
-};
+use crate::element::{Element, ElementError};
 
-pub struct Atom(pub(crate) UniquePtr<ffi::Atom>);
+pub struct Atom(UniquePtr<ffi::Atom>);
 
-impl AsPin for Atom {
-    type T = ffi::Atom;
+impl Deref for Atom {
+    type Target = UniquePtr<ffi::Atom>;
 
-    fn as_pin(&self) -> std::pin::Pin<&Self::T> {
-        unsafe { Pin::new_unchecked(self.0.as_ref().unwrap()) }
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -96,25 +93,25 @@ impl Atom {
     /// Panics if [`Atom`] contains an invalid atomic number.
     #[must_use]
     pub fn atomic_number(&self) -> u8 {
-        u8::try_from(ffi::atomic_number(self.as_pin())).expect("invalid atomic number")
+        u8::try_from(ffi::atomic_number(self)).expect("invalid atomic number")
     }
 
     /// Returns x coordinate.
     #[must_use]
     pub fn x(&self) -> f64 {
-        ffi::x(self.as_pin())
+        ffi::x(self)
     }
 
     /// Returns y coordinate.
     #[must_use]
     pub fn y(&self) -> f64 {
-        ffi::y(self.as_pin())
+        ffi::y(self)
     }
 
     /// Returns z coordinate.
     #[must_use]
     pub fn z(&self) -> f64 {
-        ffi::z(self.as_pin())
+        ffi::z(self)
     }
 
     pub(crate) fn as_ptr(&self) -> *const ffi::Atom {

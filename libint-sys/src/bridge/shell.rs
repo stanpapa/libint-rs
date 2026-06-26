@@ -11,16 +11,17 @@ pub mod ffi {
         // -----------------------------------------------------
         type Shell;
 
+        #[must_use]
         fn shell() -> UniquePtr<Shell>;
 
-        // rust::Vec<double> alpha(const Shell& shell);
-        // // std::vector<Contraction> contr(const Shell& shell);
-        // std::array<double, 3> O(const Shell& shell);
-        // rust::Vec<double> max_ln_coeff(const Shell& shell);
-        fn alpha(shell: Pin<&Shell>) -> Vec<f64>;
-        fn contr(shell: Pin<&Shell>) -> *const *const Contraction;
-        fn O(shell: Pin<&Shell>) -> [f64; 3];
-        fn max_ln_coeff(shell: Pin<&Shell>) -> Vec<f64>;
+        #[must_use]
+        fn alpha(shell: &Shell) -> Vec<f64>;
+        #[must_use]
+        fn contr(shell: &Shell) -> *const *const Contraction;
+        #[must_use]
+        fn O(shell: &Shell) -> [f64; 3];
+        #[must_use]
+        fn max_ln_coeff(shell: &Shell) -> Vec<f64>;
 
         #[Self = "Shell"]
         #[must_use]
@@ -34,20 +35,21 @@ pub mod ffi {
         // -----------------------------------------------------
         type Contraction;
 
+        #[must_use]
         fn contraction() -> UniquePtr<Contraction>;
 
         // getters
         #[must_use]
-        fn l(contraction: Pin<&Contraction>) -> i32;
+        fn l(contraction: &Contraction) -> i32;
         #[must_use]
-        fn pure(contraction: Pin<&Contraction>) -> bool;
+        fn pure(contraction: &Contraction) -> bool;
         #[must_use]
-        fn coeff(contraction: Pin<&Contraction>) -> Vec<f64>;
+        fn coeff(contraction: &Contraction) -> Vec<f64>;
 
         #[must_use]
-        fn cartesian_size(contraction: Pin<&Contraction>) -> usize;
+        fn cartesian_size(contraction: &Contraction) -> usize;
         #[must_use]
-        fn size(contraction: Pin<&Contraction>) -> usize;
+        fn size(contraction: &Contraction) -> usize;
 
     }
 }

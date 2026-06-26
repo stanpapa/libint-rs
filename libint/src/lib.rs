@@ -2,7 +2,6 @@ mod atom;
 mod basis;
 mod element;
 mod shell;
-mod utils;
 
 pub use atom::Atom;
 pub use basis::BasisSet;

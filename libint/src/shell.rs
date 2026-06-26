@@ -1,16 +1,14 @@
-use std::{fmt::Debug, pin::Pin};
+use std::{fmt::Debug, ops::Deref};
 
 use libint_sys::{UniquePtr, shell as ffi};
 
-use crate::utils::AsPin;
+pub struct Shell(UniquePtr<ffi::Shell>);
 
-pub struct Shell(pub(crate) UniquePtr<ffi::Shell>);
+impl Deref for Shell {
+    type Target = UniquePtr<ffi::Shell>;
 
-impl AsPin for Shell {
-    type T = ffi::Shell;
-
-    fn as_pin(&self) -> std::pin::Pin<&Self::T> {
-        unsafe { Pin::new_unchecked(self.0.as_ref().unwrap()) }
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -36,7 +34,7 @@ impl PartialEq for Shell {
 
 impl Shell {
     fn alpha(&self) -> Vec<f64> {
-        ffi::alpha(self.as_pin())
+        ffi::alpha(self)
     }
 
     // fn contr(&self) -> Vec<Contraction> {
@@ -56,21 +54,21 @@ impl Shell {
     // }
 
     fn origin(&self) -> [f64; 3] {
-        ffi::O(self.as_pin())
+        ffi::O(self)
     }
 
     fn max_ln_coeff(&self) -> Vec<f64> {
-        ffi::max_ln_coeff(self.as_pin())
+        ffi::max_ln_coeff(self)
     }
 }
 
 struct Contraction(UniquePtr<ffi::Contraction>);
 
-impl AsPin for Contraction {
-    type T = ffi::Contraction;
+impl Deref for Contraction {
+    type Target = UniquePtr<ffi::Contraction>;
 
-    fn as_pin(&self) -> std::pin::Pin<&Self::T> {
-        unsafe { Pin::new_unchecked(self.0.as_ref().unwrap()) }
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -92,15 +90,15 @@ impl PartialEq for Contraction {
 
 impl Contraction {
     fn l(&self) -> i32 {
-        ffi::l(self.as_pin())
+        ffi::l(self)
     }
 
     fn pure(&self) -> bool {
-        ffi::pure(self.as_pin())
+        ffi::pure(self)
     }
 
     fn coeff(&self) -> Vec<f64> {
-        ffi::coeff(self.as_pin())
+        ffi::coeff(self)
     }
 }
 

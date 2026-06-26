@@ -15,8 +15,10 @@ pub mod ffi {
         #[must_use]
         unsafe fn basis(name: &str, atoms: *const *const Atom, n: usize) -> UniquePtr<BasisSet>;
 
-        fn nshells(basis: Pin<&BasisSet>) -> usize;
-        fn shells(basis: Pin<&BasisSet>) -> *const *const Shell;
+        #[must_use]
+        fn nshells(basis: &BasisSet) -> usize;
+        #[must_use]
+        fn shells(basis: &BasisSet) -> *const *const Shell;
     }
 }
 
