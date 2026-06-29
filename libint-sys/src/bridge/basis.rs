@@ -1,3 +1,5 @@
+use cxx::CxxVector;
+
 #[cxx::bridge(namespace = "libint2")]
 pub mod ffi {
 
@@ -18,8 +20,6 @@ pub mod ffi {
         /// Number of [`Shell`]s in the basis.
         #[must_use]
         fn nshells(basis: &BasisSet) -> usize;
-        #[must_use]
-        fn shells(basis: &BasisSet) -> *const *const Shell;
 
         fn set_pure(basis: Pin<&mut BasisSet>, solid: bool);
         fn at(basis: &BasisSet, i: usize) -> UniquePtr<Shell>;
@@ -46,7 +46,10 @@ mod tests {
         let ptrs = atoms.iter().map(cxx::UniquePtr::as_ptr).collect::<Vec<_>>();
 
         let basis = unsafe { ffi::basis("def2-SVP", ptrs.as_ptr(), ptrs.len()) };
-        assert_eq!(ffi::nshells(&basis), 12);
+        // assert_eq!(ffi::nshells(&basis), 12);
+        // for i in ffi::shells_alt(&basis).iter() {
+        //     println!("{i}");
+        // }
         assert!(false);
     }
 }

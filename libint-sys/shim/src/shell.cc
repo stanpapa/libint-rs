@@ -16,17 +16,8 @@ namespace libint2 {
     return v;
   }
 
-  const Contraction* const* contr(const Shell& shell) {
-    // convert vector<Contraction> to vector<const* Contraction>
-    std::vector<const Contraction*> ptrs;
-    ptrs.reserve(shell.contr.size());
-    for (const auto& c : shell.contr) {
-      ptrs.push_back(&c);
-    }
-
-    // convert vector to pointer array
-    const Contraction* const* array = ptrs.data();
-    return array;
+  const Contraction& at_contraction(const Shell& shell, std::size_t i) {
+    return shell.contr[i];
   }
 
   std::array<double, 3> O(const Shell& shell) {
@@ -37,6 +28,19 @@ namespace libint2 {
     rust::Vec<double> v;
     std::copy(shell.max_ln_coeff.begin(), shell.max_ln_coeff.end(), std::back_inserter(v));
     return v;
+  }
+
+  std::size_t cartesian_size(const Shell& shell) {
+    return shell.cartesian_size();
+  }
+  std::size_t size(const Shell& shell) {
+    return shell.size();
+  }
+  std::size_t ncontr(const Shell& shell) {
+    return shell.ncontr();
+  }
+  std::size_t nprim(const Shell& shell) {
+    return shell.nprim();
   }
 
   // -----------------------------------------------------

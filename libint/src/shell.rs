@@ -16,7 +16,7 @@ impl Debug for Shell {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Shell")
             .field("alpha", &self.alpha())
-            // .field("contr", &self.contr())
+            .field("contr", &self.contractions().collect::<Vec<_>>())
             .field("origin", &self.origin())
             .field("max_ln_coeff", &self.max_ln_coeff())
             .finish()
@@ -43,21 +43,9 @@ impl Shell {
         ffi::alpha(self)
     }
 
-    // fn contr(&self) -> Vec<Contraction> {
-    //     let ptrs = ffi::contr(self.as_pin());
-    //     assert!(!ptrs.is_null(), "Contractions are not defined!");
-
-    //     unsafe {
-    //         std::slice::from_raw_parts(ptrs, self.alpha().len())
-    //             .iter()
-    //             .map(|&inner| {
-    //                 assert!(!inner.is_null(), "inner pointer is null");
-    //                 // Dereference each inner pointer and clone the value
-    //                 Contraction(UniquePtr::from_raw(inner))
-    //             })
-    //             .collect()
-    //     }
-    // }
+    fn contractions(&self) -> impl Iterator<Item = Contraction<'_>> {
+        (0..self.ncontr()).map(|i| Contraction(ffi::at_contraction(self, i)))
+    }
 
     fn origin(&self) -> [f64; 3] {
         ffi::O(self)
@@ -66,19 +54,35 @@ impl Shell {
     fn max_ln_coeff(&self) -> Vec<f64> {
         ffi::max_ln_coeff(self)
     }
-}
 
-struct Contraction(UniquePtr<ffi::Contraction>);
+    fn len_cartesian(&self) -> usize {
+        ffi::cartesian_size_shell(self)
+    }
 
-impl Deref for Contraction {
-    type Target = UniquePtr<ffi::Contraction>;
+    fn len(&self) -> usize {
+        ffi::size_shell(self)
+    }
 
-    fn deref(&self) -> &Self::Target {
-        &self.0
+    fn ncontr(&self) -> usize {
+        ffi::ncontr(self)
+    }
+
+    fn nprim(&self) -> usize {
+        ffi::nprim(self)
     }
 }
 
-impl Debug for Contraction {
+struct Contraction<'a>(&'a ffi::Contraction);
+
+impl Deref for Contraction<'_> {
+    type Target = ffi::Contraction;
+
+    fn deref(&self) -> &Self::Target {
+        self.0
+    }
+}
+
+impl Debug for Contraction<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Contraction")
             .field("l", &self.l())
@@ -88,13 +92,13 @@ impl Debug for Contraction {
     }
 }
 
-impl PartialEq for Contraction {
+impl PartialEq for Contraction<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.l() == other.l() && self.pure() == other.pure() && self.coeff() == other.coeff()
     }
 }
 
-impl Contraction {
+impl Contraction<'_> {
     fn l(&self) -> i32 {
         ffi::l(self)
     }
@@ -105,6 +109,14 @@ impl Contraction {
 
     fn coeff(&self) -> Vec<f64> {
         ffi::coeff(self)
+    }
+
+    fn len_cartesian(&self) -> usize {
+        ffi::cartesian_size_contraction(self)
+    }
+
+    fn len(&self) -> usize {
+        ffi::size_contraction(self)
     }
 }
 

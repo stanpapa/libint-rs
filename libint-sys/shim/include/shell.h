@@ -13,22 +13,25 @@ namespace libint2 {
   std::unique_ptr<Shell> shell();
 
   rust::Vec<double> alpha(const Shell& shell);
-  const Contraction* const* contr(const Shell& shell);
+  const Contraction& at_contraction(const Shell& shell, std::size_t i);
   std::array<double, 3> O(const Shell& shell);
   rust::Vec<double> max_ln_coeff(const Shell& shell);
+
+  std::size_t cartesian_size_shell(const Shell& shell);
+  std::size_t size_shell(const Shell& shell);
+  std::size_t ncontr(const Shell& shell);
+  std::size_t nprim(const Shell& shell);
 
   // -----------------------------------------------------
   // Contraction
   // -----------------------------------------------------
-  // constructor
-  std::unique_ptr<Contraction> contraction();
   
   // getters
   int l(const Contraction& contraction);   
   bool pure(const Contraction& contraction);   
   rust::Vec<double> coeff(const Contraction& contraction);   
 
-  size_t cartesian_size(const Contraction& contraction);
-  size_t size(const Contraction& contraction);
+  size_t cartesian_size_contraction(const Contraction& contraction);
+  size_t size_contraction(const Contraction& contraction);
 }
 

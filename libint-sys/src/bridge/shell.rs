@@ -17,11 +17,16 @@ pub mod ffi {
         #[must_use]
         fn alpha(shell: &Shell) -> Vec<f64>;
         #[must_use]
-        fn contr(shell: &Shell) -> *const *const Contraction;
+        fn at_contraction(shell: &Shell, i: usize) -> &Contraction;
         #[must_use]
         fn O(shell: &Shell) -> [f64; 3];
         #[must_use]
         fn max_ln_coeff(shell: &Shell) -> Vec<f64>;
+
+        fn cartesian_size_shell(shell: &Shell) -> usize;
+        fn size_shell(shell: &Shell) -> usize;
+        fn ncontr(shell: &Shell) -> usize;
+        fn nprim(shell: &Shell) -> usize;
 
         #[Self = "Shell"]
         #[must_use]
@@ -35,9 +40,6 @@ pub mod ffi {
         // -----------------------------------------------------
         type Contraction;
 
-        #[must_use]
-        fn contraction() -> UniquePtr<Contraction>;
-
         // getters
         #[must_use]
         fn l(contraction: &Contraction) -> i32;
@@ -47,9 +49,9 @@ pub mod ffi {
         fn coeff(contraction: &Contraction) -> Vec<f64>;
 
         #[must_use]
-        fn cartesian_size(contraction: &Contraction) -> usize;
+        fn cartesian_size_contraction(contraction: &Contraction) -> usize;
         #[must_use]
-        fn size(contraction: &Contraction) -> usize;
+        fn size_contraction(contraction: &Contraction) -> usize;
 
     }
 }

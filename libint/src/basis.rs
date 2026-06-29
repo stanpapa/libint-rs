@@ -1,4 +1,4 @@
-use std::ops::{Deref, DerefMut, Index};
+use std::ops::Deref;
 
 use libint_sys::{UniquePtr, basis as ffi};
 
@@ -34,20 +34,48 @@ impl BasisSet {
         Shell::from(ffi::at(self, i))
     }
 
+    pub fn shells(&self) -> Vec<Shell> {
+        (0..self.len()).map(|i| self.at(i)).collect()
+    }
+
     pub fn set_pure(&mut self, solid: bool) {
         ffi::set_pure(self.0.pin_mut(), solid);
     }
 
-    pub fn nbf(basis: &BasisSet) -> usize {
-        ffi::nbf(basis)
+    pub fn nbf(&self) -> usize {
+        ffi::nbf(self)
     }
 
-    pub fn max_nprim(basis: &BasisSet) -> usize {
-        ffi::max_nprim(basis)
+    pub fn max_nprim(&self) -> usize {
+        ffi::max_nprim(self)
     }
 
-    pub fn max_l(basis: &BasisSet) -> usize {
-        ffi::max_l(basis)
+    pub fn max_l(&self) -> usize {
+        ffi::max_l(self)
+    }
+
+    pub fn iter(&self) -> std::vec::IntoIter<Shell> {
+        <&Self as IntoIterator>::into_iter(self)
+    }
+}
+
+impl IntoIterator for BasisSet {
+    type Item = Shell;
+
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.shells().into_iter()
+    }
+}
+
+impl IntoIterator for &BasisSet {
+    type Item = Shell;
+
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.shells().into_iter()
     }
 }
 
@@ -64,5 +92,8 @@ H   0.7920   0.0000  -0.4973
         let atoms = crate::atom::read_dotxyz_str(xyz).unwrap();
         let basis = super::BasisSet::new("def2-SVP", &atoms);
         assert_eq!(basis.len(), 12);
+        assert_eq!(basis.nbf(), 24);
+        assert_eq!(basis.max_nprim(), 5);
+        assert_eq!(basis.max_l(), 2);
     }
 }

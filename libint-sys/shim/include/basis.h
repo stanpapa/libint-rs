@@ -10,8 +10,6 @@ namespace libint2 {
 
   std::size_t nshells(const BasisSet& basis);
 
-  const Shell* const* shells(const BasisSet& basis);
-
   std::unique_ptr<Shell> at(const BasisSet& basis, std::size_t i);
 
   void set_pure(BasisSet& basis, bool solid);

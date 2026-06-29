@@ -22,19 +22,6 @@ namespace libint2 {
     return basis.size();
   }
 
-  const Shell* const* contr(const BasisSet& basis) {
-    // convert vector<Shell> to vector<const* Shell>
-    std::vector<const Shell*> ptrs;
-    ptrs.reserve(basis.size());
-    for (const auto& shell : basis.shells()) {
-      ptrs.push_back(&shell);
-    }
-
-    // convert vector to pointer array
-    const Shell* const* array = ptrs.data();
-    return array;
-  }
-
   void set_pure(BasisSet& basis, bool solid) {
     basis.set_pure(solid);
   }
