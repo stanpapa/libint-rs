@@ -1,6 +1,7 @@
 use std::{fmt::Debug, num::ParseFloatError, ops::Deref, str::FromStr};
 
-use libint_sys::{UniquePtr, atom as ffi};
+use cxx::UniquePtr;
+use libint_sys::atom as ffi;
 
 use crate::element::{Element, ElementError};
 

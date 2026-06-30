@@ -1,6 +1,7 @@
 use std::{fmt::Debug, ops::Deref};
 
-use libint_sys::{UniquePtr, shell as ffi};
+use cxx::UniquePtr;
+use libint_sys::shell as ffi;
 
 pub struct Shell(UniquePtr<ffi::Shell>);
 

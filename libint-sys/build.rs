@@ -3,7 +3,7 @@ use std::path::PathBuf;
 fn build() {
     // define list of bridges
     // it is assumed that all bridges are defined in bridge/{bridge}.rs
-    let bridges = ["atom", "basis", "initialize", "shell"];
+    let bridges = ["atom", "basis", "engine", "initialize", "shell"];
 
     // collect shims
     let shim_root = std::path::PathBuf::from("shim");

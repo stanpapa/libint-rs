@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
-use libint_sys::{UniquePtr, basis as ffi};
+use cxx::UniquePtr;
+use libint_sys::basis as ffi;
 
 use crate::{Atom, Shell};
 
@@ -38,6 +39,7 @@ impl BasisSet {
         (0..self.len()).map(|i| self.at(i)).collect()
     }
 
+    /// if `false` use Cartesian Gaussians
     pub fn set_pure(&mut self, solid: bool) {
         ffi::set_pure(self.0.pin_mut(), solid);
     }
