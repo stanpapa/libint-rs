@@ -1,7 +1,15 @@
-use std::{fmt::Debug, num::ParseFloatError, ops::Deref, str::FromStr};
+use std::{
+    fmt::Debug,
+    num::ParseFloatError,
+    ops::{Deref, DerefMut},
+    str::FromStr,
+};
 
 use cxx::UniquePtr;
 use libint_sys::atom as ffi;
+
+const BOHR_TO_ANGSTROM: f64 = 0.529_177_210_903;
+const ANGSTROM_TO_BOHR: f64 = 1. / BOHR_TO_ANGSTROM;
 
 use crate::element::{Element, ElementError};
 
@@ -12,6 +20,62 @@ impl Deref for Atom {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Atom {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+#[cfg(test)]
+impl approx::AbsDiffEq for Atom {
+    type Epsilon = f64;
+
+    fn default_epsilon() -> Self::Epsilon {
+        Self::Epsilon::default_epsilon()
+    }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        self.atomic_number() == other.atomic_number()
+            && approx::abs_diff_eq!(self.x(), other.x(), epsilon = epsilon)
+            && approx::abs_diff_eq!(self.y(), other.y(), epsilon = epsilon)
+            && approx::abs_diff_eq!(self.z(), other.z(), epsilon = epsilon)
+    }
+}
+
+#[cfg(test)]
+impl approx::RelativeEq for Atom {
+    fn default_max_relative() -> Self::Epsilon {
+        Self::Epsilon::default_max_relative()
+    }
+
+    fn relative_eq(
+        &self,
+        other: &Self,
+        epsilon: Self::Epsilon,
+        max_relative: Self::Epsilon,
+    ) -> bool {
+        self.atomic_number() == other.atomic_number()
+            && approx::relative_eq!(
+                self.x(),
+                other.x(),
+                epsilon = epsilon,
+                max_relative = max_relative
+            )
+            && approx::relative_eq!(
+                self.y(),
+                other.y(),
+                epsilon = epsilon,
+                max_relative = max_relative
+            )
+            && approx::relative_eq!(
+                self.z(),
+                other.z(),
+                epsilon = epsilon,
+                max_relative = max_relative
+            )
     }
 }
 
@@ -118,6 +182,10 @@ impl Atom {
     pub(crate) fn as_ptr(&self) -> *const ffi::Atom {
         self.0.as_ptr()
     }
+
+    fn scale(&mut self, factor: f64) {
+        ffi::scale(self.pin_mut(), factor);
+    }
 }
 
 pub fn read_dotxyz(path: std::path::PathBuf) -> std::io::Result<Vec<Atom>> {
@@ -136,7 +204,11 @@ pub fn read_dotxyz_str(xyz: &str) -> std::io::Result<Vec<Atom>> {
 
     let atoms = lines
         .filter(|l| !l.trim().is_empty())
-        .map(|l| Atom::from_str(l).expect("invalid atom"))
+        .map(|l| {
+            let mut atom = Atom::from_str(l).expect("invalid atom");
+            atom.scale(ANGSTROM_TO_BOHR);
+            atom
+        })
         .collect::<Vec<_>>();
     if atoms.len() != n {
         return Err(std::io::Error::other(
@@ -150,6 +222,8 @@ pub fn read_dotxyz_str(xyz: &str) -> std::io::Result<Vec<Atom>> {
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;
+
+    use approx::assert_relative_eq;
 
     use super::Atom;
 
@@ -180,8 +254,16 @@ H   0.7920   0.0000  -0.4973
     ";
         let atoms = super::read_dotxyz_str(xyz).unwrap();
         assert_eq!(atoms.len(), 3);
-        assert_eq!(atoms[0], Atom::new(8, 0., 0., 0.0626));
-        assert_eq!(atoms[1], Atom::new(1, -0.7920, 0., -0.4973));
-        assert_eq!(atoms[2], Atom::new(1, 0.7920, 0., -0.4973));
+        assert_relative_eq!(atoms[0], Atom::new(8, 0., 0., 0.11830), epsilon = 1e-5);
+        assert_relative_eq!(
+            atoms[1],
+            Atom::new(1, -1.49667, 0., -0.93976),
+            epsilon = 1e-5
+        );
+        assert_relative_eq!(
+            atoms[2],
+            Atom::new(1, 1.49667, 0., -0.93976),
+            epsilon = 1e-5
+        );
     }
 }

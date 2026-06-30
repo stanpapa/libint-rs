@@ -19,6 +19,8 @@ pub mod ffi {
         fn y(atom: &Atom) -> f64;
         #[must_use]
         fn z(atom: &Atom) -> f64;
+
+        fn scale(atom: Pin<&mut Atom>, factor: f64);
     }
 }
 

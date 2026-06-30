@@ -149,12 +149,12 @@ H   0.7920   0.0000  -0.4973
 
         for s1 in 0..basis.len() {
             for s2 in 0..basis.len() {
+                print!("compute shell set {{{s1},{s2}}} ... ");
                 let buffer = engine.compute1(&basis.at(s1), &basis.at(s2));
+                println!("done");
                 let Some(ints) = buffer.get(0) else {
                     continue;
                 };
-                // println!("{}", buffer.len());
-                // println!("{:?}", buffer.get(0));
 
                 let bf1 = shell2bf[s1];
                 let n1 = basis.at(s1).len();
@@ -163,14 +163,13 @@ H   0.7920   0.0000  -0.4973
 
                 for f1 in 0..n1 {
                     for f2 in 0..n2 {
-                        println!("{} {} {}", bf1 + f1, bf2 + f2, ints[f1 * n2 + f2]);
+                        println!("  {} {} {}", bf1 + f1, bf2 + f2, ints[f1 * n2 + f2]);
                     }
                 }
             }
         }
 
         finalize();
-        assert!(false);
     }
 
     #[test]

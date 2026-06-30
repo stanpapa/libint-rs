@@ -1,18 +1,19 @@
 #pragma once
 
-#include "rust/cxx.h"
 #include "libint2/atom.h"
+#include "rust/cxx.h"
 #include <memory>
 
 namespace libint2 {
-  std::unique_ptr<Atom> atom(const int atomic_number, const double x, const double y, const double z);
+std::unique_ptr<Atom> atom(const int atomic_number, const double x,
+                           const double y, const double z);
 
-  // getters
-  int atomic_number(const Atom& atom);  
-  double x(const Atom& atom);  
-  double y(const Atom& atom);  
-  double z(const Atom& atom);  
+// getters
+int atomic_number(const Atom &atom);
+double x(const Atom &atom);
+double y(const Atom &atom);
+double z(const Atom &atom);
 
-  // std::unique_ptr<std::vector<Atom>> read_dotxyz(const std::string& is);
-}
-
+void scale(Atom& atom, double factor);
+// std::unique_ptr<std::vector<Atom>> read_dotxyz(const std::string& is);
+} // namespace libint2
