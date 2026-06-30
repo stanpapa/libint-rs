@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::ops::{Deref, Index};
 
 use cxx::UniquePtr;
 use libint_sys::basis as ffi;
@@ -21,6 +21,11 @@ impl BasisSet {
         Self(unsafe { ffi::basis(name, ptrs.as_ptr(), ptrs.len()) })
     }
 
+    /// if `false` use Cartesian Gaussians
+    pub fn set_pure(&mut self, solid: bool) {
+        ffi::set_pure(self.0.pin_mut(), solid);
+    }
+
     #[must_use]
     pub fn len(&self) -> usize {
         ffi::nshells(self)
@@ -39,9 +44,8 @@ impl BasisSet {
         (0..self.len()).map(|i| self.at(i)).collect()
     }
 
-    /// if `false` use Cartesian Gaussians
-    pub fn set_pure(&mut self, solid: bool) {
-        ffi::set_pure(self.0.pin_mut(), solid);
+    pub fn shell2bf(&self) -> Vec<usize> {
+        ffi::shell2bf(self).iter().copied().collect()
     }
 
     pub fn nbf(&self) -> usize {

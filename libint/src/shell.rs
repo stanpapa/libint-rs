@@ -60,8 +60,12 @@ impl Shell {
         ffi::cartesian_size_shell(self)
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         ffi::size_shell(self)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     fn ncontr(&self) -> usize {

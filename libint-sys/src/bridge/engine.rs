@@ -6,6 +6,7 @@ pub mod ffi {
 
         type Engine;
         type Operator;
+        type Shell = crate::shell::Shell;
 
         #[must_use]
         fn engine(
@@ -14,5 +15,9 @@ pub mod ffi {
             max_l: usize,
             deriv_order: usize,
         ) -> UniquePtr<Engine>;
+
+        fn nshellsets(engine: &Engine) -> usize;
+        fn results(engine: &Engine) -> Vec<usize>;
+        fn compute1(engine: Pin<&mut Engine>, s1: &Shell, s2: &Shell);
     }
 }

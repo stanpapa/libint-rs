@@ -30,10 +30,10 @@ namespace libint2 {
     return v;
   }
 
-  std::size_t cartesian_size(const Shell& shell) {
+  std::size_t cartesian_size_shell(const Shell& shell) {
     return shell.cartesian_size();
   }
-  std::size_t size(const Shell& shell) {
+  std::size_t size_shell(const Shell& shell) {
     return shell.size();
   }
   std::size_t ncontr(const Shell& shell) {

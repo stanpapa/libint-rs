@@ -18,16 +18,12 @@ namespace libint2 {
     return std::make_unique<BasisSet>(s, tmp);
   }
 
-  std::size_t nshells(const BasisSet& basis) {
-    return basis.size();
-  }
-
   void set_pure(BasisSet& basis, bool solid) {
     basis.set_pure(solid);
   }
 
-  std::unique_ptr<Shell> at(const BasisSet& basis, std::size_t i) {
-    return std::make_unique<Shell>(basis[i]);
+  std::size_t nshells(const BasisSet& basis) {
+    return basis.size();
   }
 
   std::size_t nbf(const BasisSet& basis) {
@@ -40,6 +36,14 @@ namespace libint2 {
 
   std::size_t max_l(const BasisSet& basis) {
     return basis.max_l();
+  }
+
+  const std::vector<std::size_t>& shell2bf(const BasisSet& basis) {
+    return basis.shell2bf();
+  }
+
+  std::unique_ptr<Shell> at(const BasisSet& basis, std::size_t i) {
+    return std::make_unique<Shell>(basis[i]);
   }
 }
 

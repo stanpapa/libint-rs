@@ -17,15 +17,17 @@ pub mod ffi {
         #[must_use]
         unsafe fn basis(name: &str, atoms: *const *const Atom, n: usize) -> UniquePtr<BasisSet>;
 
+        fn set_pure(basis: Pin<&mut BasisSet>, solid: bool);
+
         /// Number of [`Shell`]s in the basis.
         #[must_use]
         fn nshells(basis: &BasisSet) -> usize;
-
-        fn set_pure(basis: Pin<&mut BasisSet>, solid: bool);
-        fn at(basis: &BasisSet, i: usize) -> UniquePtr<Shell>;
         fn nbf(basis: &BasisSet) -> usize;
         fn max_nprim(basis: &BasisSet) -> usize;
         fn max_l(basis: &BasisSet) -> usize;
+        fn shell2bf(basis: &BasisSet) -> &CxxVector<usize>;
+
+        fn at(basis: &BasisSet, i: usize) -> UniquePtr<Shell>;
     }
 }
 
