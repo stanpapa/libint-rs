@@ -5,7 +5,6 @@ pub mod ffi {
         include!("libint-sys/shim/include/engine.h");
 
         type Engine;
-        type Operator;
         type Shell = crate::shell::Shell;
 
         #[must_use]

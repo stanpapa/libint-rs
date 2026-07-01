@@ -1,12 +1,13 @@
 use std::{
     marker::PhantomData,
-    ops::{Deref, DerefMut, Index},
+    ops::{Deref, DerefMut},
 };
 
 use cxx::UniquePtr;
 use libint_sys::engine as ffi;
+use ndarray::{Array2, Array3, ArrayView, s};
 
-use crate::Shell;
+use crate::{BasisSet, Shell};
 
 pub struct Engine(UniquePtr<ffi::Engine>);
 
@@ -28,9 +29,7 @@ impl DerefMut for Engine {
 pub enum Operator {
     /// Overlap
     Overlap = 0,
-    /// Electronic kinetic energy, i.e. \f$ -\frac{1}{2} \nabla^2 \f$
     Kinetic = 1,
-    /// Coulomb potential due to point charges
     Nuclear = 2,
     /// erf-attenuated point-charge Coulomb operator,
     /// \f$ \mathrm{erf}(\omega r)/r \f$
@@ -38,10 +37,6 @@ pub enum Operator {
     /// erfc-attenuated point-charge Coulomb operator,
     /// \f$ \mathrm{erfc}(\omega r)/r \f$
     ErfcNuclear = 4,
-    /// overlap + (Cartesian) electric dipole moment,
-    /// \f$ x_O, y_O, z_O \f$, where
-    /// \f$ x_O \equiv x - O_x \f$ is relative to
-    /// origin \f$ \vec{O} \f$
     Emultipole1 = 5,
     // emultipole2 = 6,
     // emultipole3 = 7,
@@ -61,11 +56,48 @@ pub enum Operator {
     Invalid = -1,
 }
 
+// macro_rules! operators {
+//     ($($doc:expr, $op:ident => $id:expr, $nopers:expr),* $(,)?) => {
+//         pub mod operator {
+//             // Generate the marker trait
+//             pub trait Operator { const ID: i32; const NOPERS: usize; }
+
+//             $(
+//                 #[doc = $doc]
+//                 #[allow(clippy::doc_markdown)]
+//                 pub struct $op;
+
+//                 impl Operator for $op {
+//                     const ID: i32 = $id;
+//                     const NOPERS: usize = $nopers;
+//                 }
+//             )*
+//         }
+//     };
+// }
+
+// operators! {
+//     "Overlap",
+//     Overlap => 1, 1,
+//     "Electronic kinetic energy, i.e. -1/2 ∇^2 ",
+//     Kinetic => 2, 1,
+//     "Coulomb potential due to point charges",
+//     Nuclear => 3, 1,
+//     r"overlap + (Cartesian) electric dipole moment,
+//     $ x_O, y_O, z_O $, where
+//     $ x_O \equiv x - O_x $ is relative to
+//     origin $ \vec{O} $",
+//     Emultipole1 => 5, 4,
+//     r"(2-body) Coulomb operator = $ r_{12}^{-1} $",
+//     Coulomb => 14, 1,
+// }
+
 impl Engine {
     pub fn new(operator: Operator, max_nprim: usize, max_l: usize, deriv_order: usize) -> Engine {
         Engine(ffi::engine(operator as i32, max_nprim, max_l, deriv_order))
     }
 
+    #[must_use]
     pub fn nshellsets(&self) -> usize {
         ffi::nshellsets(self)
     }
@@ -84,6 +116,41 @@ impl Engine {
             nbf: s1.len() * s2.len(),
             _marker: PhantomData,
         }
+    }
+
+    pub fn onebody(&mut self, basis: &BasisSet) -> Array3<f64> {
+        let shell2bf = basis.shell2bf();
+        let nop = self.nshellsets();
+        println!("nshellsets: {nop}");
+
+        let mut onebody = Array3::zeros((nop, basis.nbf(), basis.nbf()));
+        for s1 in 0..basis.len() {
+            for s2 in s1..basis.len() {
+                let buffer = self.compute1(&basis.at(s1), &basis.at(s2));
+
+                for op in 0..nop {
+                    let Some(ints) = buffer.get(op) else {
+                        continue;
+                    };
+
+                    let bf1 = shell2bf[s1];
+                    let n1 = basis.at(s1).len();
+                    let bf2 = shell2bf[s2];
+                    let n2 = basis.at(s2).len();
+
+                    let mut slice = onebody.slice_mut(s![op, bf1..(bf1 + n1), bf2..(bf2 + n2)]);
+                    let m = ArrayView::from_shape((n1, n2), ints).unwrap();
+                    slice.assign(&m);
+
+                    if s1 != s2 {
+                        let mut slice = onebody.slice_mut(s![op, bf2..(bf2 + n2), bf1..(bf1 + n1)]);
+                        slice.assign(&m.t());
+                    }
+                }
+            }
+        }
+
+        onebody
     }
 }
 
@@ -111,27 +178,11 @@ impl Buffer<'_> {
     }
 }
 
-// impl Index<usize> for Buffer<'_> {
-//     type Output = [f64];
-
-//     fn index(&self, index: usize) -> &Self::Output {
-//         // reinterpret pointers as floats
-//         let ptr = self.ptrs[index] as *const f64;
-
-//         // libint2 returns null for shell-sets that screen to zero
-//         if ptr.is_null() {
-//             &[]
-//         } else {
-//             unsafe { std::slice::from_raw_parts(ptr, self.nbf) }
-//         }
-//     }
-// }
-
 #[cfg(test)]
 mod tests {
     use libint_sys::initialize::{finalize, initialize};
 
-    use crate::{BasisSet, Engine, engine::Operator};
+    use crate::{BasisSet, Engine, Operator};
 
     #[test]
     fn overlap() {
@@ -145,57 +196,27 @@ H   0.7920   0.0000  -0.4973
         let basis = BasisSet::new("def2-SVP", &atoms);
         initialize(true);
         let mut engine = Engine::new(Operator::Overlap, basis.max_nprim(), basis.max_l(), 0);
-        let shell2bf = basis.shell2bf();
+        let overlap = engine.onebody(&basis);
 
-        for s1 in 0..basis.len() {
-            for s2 in 0..basis.len() {
-                print!("compute shell set {{{s1},{s2}}} ... ");
-                let buffer = engine.compute1(&basis.at(s1), &basis.at(s2));
-                println!("done");
-                let Some(ints) = buffer.get(0) else {
-                    continue;
-                };
-
-                let bf1 = shell2bf[s1];
-                let n1 = basis.at(s1).len();
-                let bf2 = shell2bf[s2];
-                let n2 = basis.at(s2).len();
-
-                for f1 in 0..n1 {
-                    for f2 in 0..n2 {
-                        println!("  {} {} {}", bf1 + f1, bf2 + f2, ints[f1 * n2 + f2]);
-                    }
-                }
-            }
-        }
-
+        println!("{overlap}");
         finalize();
+        assert!(false);
     }
 
     #[test]
     fn dipole() {
         let xyz = r"3
 
-O   0.0000   0.0000   0.0626
-H  -0.7920   0.0000  -0.4973
-H   0.7920   0.0000  -0.4973
-    ";
+    O   0.0000   0.0000   0.0626
+    H  -0.7920   0.0000  -0.4973
+    H   0.7920   0.0000  -0.4973
+        ";
         let atoms = crate::atom::read_dotxyz_str(xyz).unwrap();
         let basis = BasisSet::new("def2-SVP", &atoms);
         initialize(true);
         let mut engine = Engine::new(Operator::Emultipole1, basis.max_nprim(), basis.max_l(), 0);
-        let shell2bf = basis.shell2bf();
-
-        for s1 in 0..basis.len() {
-            for s2 in 0..basis.len() {
-                let buffer = engine.compute1(&basis.at(s1), &basis.at(s2));
-                // println!("{}", buffer.len());
-                // println!("{:?}", buffer.get(0));
-                // println!("{:?}", buffer.get(1));
-                // println!("{:?}", buffer.get(2));
-                // println!("{:?}", buffer.get(3));
-            }
-        }
+        let dipole = engine.onebody(&basis);
+        println!("{dipole}");
 
         finalize();
         assert!(false);

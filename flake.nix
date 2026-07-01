@@ -37,23 +37,24 @@
 
             # Compilers / toolchain
             toolchain
-            llvmPackages.bintools
           ];
 
           buildInputs = with pkgs; [
             cargo-expand
-            cargo-release
+            clang
             clang-tools
+            mold
           ];
-
-          NIX_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
-            pkgs.stdenv.cc.cc
-          ];
-
-          NIX_LD = builtins.readFile "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
 
           shellHook = ''
-            export LD_LIBRARY_PATH=$NIX_LD_LIBRARY_PATH:$src/lib
+            mkdir -p .cargo
+            cat << EOF > .cargo/config.toml
+# Generated automatically by nix devShell
+
+[target.x86_64-unknown-linux-gnu]
+linker = "${pkgs.clang}/bin/clang"
+rustflags = ["-C", "link-arg=-fuse-ld=${pkgs.mold}/bin/mold"]
+EOF
           '';
         };
     });
