@@ -11,6 +11,7 @@ libint-src = { version = "0.1.0", path = "libint-src" }
 libint-sys = { version = "0.1.0", path = "libint-sys" }
 ndarray = "0.17.2"
 pkg-config = "0.3.32"
+semver = "1.0.28"
 thiserror = "2.0.18"
 
 [workspace.package]

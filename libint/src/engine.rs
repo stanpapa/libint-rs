@@ -31,66 +31,8 @@ pub enum Operator {
     Overlap = 0,
     Kinetic = 1,
     Nuclear = 2,
-    /// erf-attenuated point-charge Coulomb operator,
-    /// \f$ \mathrm{erf}(\omega r)/r \f$
-    ErfNuclear = 3,
-    /// erfc-attenuated point-charge Coulomb operator,
-    /// \f$ \mathrm{erfc}(\omega r)/r \f$
-    ErfcNuclear = 4,
-    Emultipole1 = 5,
-    // emultipole2 = 6,
-    // emultipole3 = 7,
-    // sphemultipole = 8,
-    // opVop = 9,
-    // delta = 10,
-    // coulomb = 11,
-    // r12_m1 = 11, // alias
-    // cgtg = 12,
-    // cgtg_x_coulomb = 13,
-    // delcgtg2 = 14,
-    // r12 = 15,
-    // r12_1 = 16,
-    // erf_coulomb = 17,
-    // erfc_coulomb = 18,
-    // stg = 19,
-    Invalid = -1,
+    Emultipole1 = 7,
 }
-
-// macro_rules! operators {
-//     ($($doc:expr, $op:ident => $id:expr, $nopers:expr),* $(,)?) => {
-//         pub mod operator {
-//             // Generate the marker trait
-//             pub trait Operator { const ID: i32; const NOPERS: usize; }
-
-//             $(
-//                 #[doc = $doc]
-//                 #[allow(clippy::doc_markdown)]
-//                 pub struct $op;
-
-//                 impl Operator for $op {
-//                     const ID: i32 = $id;
-//                     const NOPERS: usize = $nopers;
-//                 }
-//             )*
-//         }
-//     };
-// }
-
-// operators! {
-//     "Overlap",
-//     Overlap => 1, 1,
-//     "Electronic kinetic energy, i.e. -1/2 ∇^2 ",
-//     Kinetic => 2, 1,
-//     "Coulomb potential due to point charges",
-//     Nuclear => 3, 1,
-//     r"overlap + (Cartesian) electric dipole moment,
-//     $ x_O, y_O, z_O $, where
-//     $ x_O \equiv x - O_x $ is relative to
-//     origin $ \vec{O} $",
-//     Emultipole1 => 5, 4,
-//     r"(2-body) Coulomb operator = $ r_{12}^{-1} $",
-//     Coulomb => 14, 1,
-// }
 
 impl Engine {
     pub fn new(operator: Operator, max_nprim: usize, max_l: usize, deriv_order: usize) -> Engine {
