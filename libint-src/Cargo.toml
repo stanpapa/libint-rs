@@ -18,6 +18,8 @@ system = []
 
 [build-dependencies]
 pkg-config.workspace = true
+semver.workspace = true
+thiserror.workspace = true
 
 [lints]
 workspace = true

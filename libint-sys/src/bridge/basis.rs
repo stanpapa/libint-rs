@@ -30,28 +30,3 @@ pub mod ffi {
         fn at(basis: &BasisSet, i: usize) -> UniquePtr<Shell>;
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::bridge::atom::ffi::atom;
-
-    use super::ffi;
-
-    #[test]
-    #[allow(clippy::float_cmp)]
-    fn def2_svp() {
-        let atoms = [
-            atom(8, 0., 0., 0.0626),
-            atom(1, -0.7920, 0.0000, -0.4973),
-            atom(1, 0.7920, 0.0000, -0.4973),
-        ];
-        let ptrs = atoms.iter().map(cxx::UniquePtr::as_ptr).collect::<Vec<_>>();
-
-        let basis = unsafe { ffi::basis("def2-SVP", ptrs.as_ptr(), ptrs.len()) };
-        // assert_eq!(ffi::nshells(&basis), 12);
-        // for i in ffi::shells_alt(&basis).iter() {
-        //     println!("{i}");
-        // }
-        assert!(false);
-    }
-}

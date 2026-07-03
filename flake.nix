@@ -29,6 +29,7 @@
             # pkg-config needs to be in nativeBuildInputs for its setupHooks to run (https://discourse.nixos.org/t/how-can-we-create-shell-script-with-pkg-config-path-defined-for-given-packages/68928)
             pkg-config
             meson
+            cmake
             ninja
             boost
             eigen
@@ -46,16 +47,8 @@
             mold
           ];
 
-          shellHook = ''
-            mkdir -p .cargo
-            cat << EOF > .cargo/config.toml
-# Generated automatically by nix devShell
-
-[target.x86_64-unknown-linux-gnu]
-linker = "${pkgs.clang}/bin/clang"
-rustflags = ["-C", "link-arg=-fuse-ld=${pkgs.mold}/bin/mold"]
-EOF
-          '';
+          # use mold for linking
+          RUSTFLAGS = "-C link-arg=-fuse-ld=${pkgs.mold}/bin/mold -C linker=${pkgs.clang}/bin/clang";
         };
     });
 }
