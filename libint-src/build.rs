@@ -128,6 +128,14 @@ fn main() {
         let joined = std::env::join_paths(&includes).unwrap();
         println!("cargo:include={}", joined.to_string_lossy());
     } else {
-        todo!("libint-build")
+        let libint_root = PathBuf::from(std::env::var("OUT_DIR").unwrap()).join("libint-2.13.1");
+        println!("cargo:warning={}", libint_root.display());
+        if !libint_root.exists() {
+            let dir = libint_build::download(&PathBuf::from(std::env::var("OUT_DIR").unwrap()))
+                .expect("download failed");
+            assert_eq!(libint_root, dir, "Download directory is not as expected");
+        }
+        let config = libint_build::Configure::default();
+        config.build(libint_root);
     }
 }

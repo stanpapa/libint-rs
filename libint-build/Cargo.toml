@@ -8,6 +8,11 @@ license-file.workspace = true
 repository.workspace = true
 
 [dependencies]
+anyhow.workspace = true
+cmake.workspace = true
+flate2.workspace = true
+tar.workspace = true
+ureq.workspace = true
 
 [lints]
 workspace = true
