@@ -5,10 +5,14 @@ use ureq::{
     tls::{TlsConfig, TlsProvider},
 };
 
-const LIBINT_VERSION: &str = "2.13.1";
+// Tracking `master` HEAD rather than a release tag: v2.13.1 (the latest tag as of
+// writing) has an install bug where the compiled static libs never get copied into
+// CMAKE_INSTALL_PREFIX on hosts where CMAKE_INSTALL_LIBDIR resolves to `lib64` (fixed
+// post-release upstream). Switch back to a pinned tag once a release ships the fix.
+const LIBINT_VERSION: &str = "master";
 
 fn libint_source_url() -> String {
-    format!("https://github.com/evaleev/libint/archive/refs/tags/v{LIBINT_VERSION}.tar.gz")
+    format!("https://github.com/evaleev/libint/archive/refs/heads/{LIBINT_VERSION}.tar.gz")
 }
 
 fn get_agent() -> ureq::Agent {

@@ -1,6 +1,9 @@
-//! Execute make of OpenBLAS, and its options
+//! Execute make of Libint, and its options
 
-use std::{fmt::Display, path::Path, str::FromStr};
+use std::{
+    fmt::Display,
+    path::{Path, PathBuf},
+};
 
 // use glob::glob;
 
@@ -37,7 +40,7 @@ pub enum CartGaussOrdering {
 
 impl Display for CartGaussOrdering {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(
+        write!(
             f,
             "{}",
             match self {
@@ -63,7 +66,7 @@ pub enum ShGaussOrdering {
 
 impl Display for ShGaussOrdering {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(
+        write!(
             f,
             "{}",
             match self {
@@ -83,7 +86,7 @@ pub enum ShellSet {
 
 impl Display for ShellSet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(
+        write!(
             f,
             "{}",
             match self {
@@ -110,7 +113,6 @@ pub struct Configure {
     pub eri2_opt_am: Vec<u8>,
     /// angular momentum for derivatives of 3c-2e integrals (optimised)
     pub eri3_opt_am: Vec<u8>,
-    pub one_body: Option<u8>,
     pub multipole_max_order: Option<u8>,
     pub eri: Option<u8>,
     pub eri2: Option<u8>,
@@ -126,7 +128,7 @@ impl Default for Configure {
         Configure {
             max_am: vec![2, 2],
             eri_max_am: vec![2, 2],
-            one_body: Some(1),
+            // one_body: Some(1),
             multipole_max_order: Some(2),
             eri: Some(1),
             eri2_max_am: vec![],
@@ -143,9 +145,9 @@ impl Default for Configure {
     }
 }
 
-fn libint_list(v: Vec<u8>) -> String {
+fn libint_list(v: &[u8]) -> String {
     v.iter()
-        .map(|i| i.to_string())
+        .map(ToString::to_string)
         .collect::<Vec<_>>()
         .join(";")
 }
@@ -162,15 +164,34 @@ impl Configure {
     /// # Panics
     ///
     /// Panics if log files cannot be created.
-    pub fn build<P: AsRef<Path>>(self, libint_root: P) {
+    ///
+    /// Returns the cmake install prefix (headers end up under `<prefix>/include`).
+    #[must_use]
+    pub fn build<P: AsRef<Path>>(self, libint_root: P) -> PathBuf {
+        // create build directory
         let root = libint_root.as_ref();
-        let build_dir = root.join("build");
+        // let build_dir = root.join("build");
+        // std::fs::create_dir_all(&build_dir).expect("creating builddir failed.");
 
-        let mut config = cmake::Config::new(build_dir);
+        let mut config = cmake::Config::new(root);
 
         let config = config
-            .define("LIBINT2_MAX_AM", libint_list(self.max_am))
-            .define("LIBINT2_ERI_MAX_AM", libint_list(self.eri_max_am))
+            // Force a fixed libdir: CMake's GNUInstallDirs defaults to `lib64` on this
+            // (and any similarly-detected) 64-bit Linux host since it can't recognize
+            // NixOS as a non-multilib distro. Nixpkgs' own cmake setup-hook papers over
+            // this by injecting the same override; we invoke cmake directly, so set it
+            // ourselves to get a deterministic path (`<prefix>/lib`) instead of guessing.
+            .define("CMAKE_INSTALL_LIBDIR", "lib")
+            .define("LIBINT2_MAX_AM", libint_list(&self.max_am))
+            .define("LIBINT2_ERI_MAX_AM", libint_list(&self.eri_max_am))
+            .define(
+                "LIBINT2_ENABLE_ONEBODY",
+                (self.max_am.len() - 1).to_string(),
+            )
+            .define(
+                "LIBINT2_ENABLE_ERI",
+                (self.eri_max_am.len() - 1).to_string(),
+            )
             .define(
                 "LIBINT2_CARTGAUSS_ORDERING",
                 self.cartesian_ordering.to_string(),
@@ -181,12 +202,6 @@ impl Configure {
             )
             .define("LIBINT2_SHELL_SET", self.shell_set.to_string());
 
-        let config = if let Some(one_body) = self.one_body {
-            config.define("LIBINT2_ENABLE_ONEBODY", one_body.to_string())
-        } else {
-            config
-        };
-
         let config = if let Some(multipole_max_order) = self.multipole_max_order {
             config.define(
                 "LIBINT2_MULTIPLE_MAX_ORDER",
@@ -196,7 +211,7 @@ impl Configure {
             config
         };
 
-        config.build();
+        config.build()
     }
 }
 

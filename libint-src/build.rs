@@ -99,6 +99,17 @@ fn probe() -> Result<LibintFlags, LibintError> {
     Ok(flags)
 }
 
+/// Eigen headers are required at compile-time even for a from-source static
+/// build: `libint2/engine.h` transitively includes `solidharmonics.h` and
+/// `engine.impl.h`, both of which use Eigen, but libint2's own install tree
+/// does not bundle Eigen headers.
+fn eigen_include_paths() -> Vec<PathBuf> {
+    pkg_config::Config::new()
+        .probe("eigen3")
+        .expect("eigen3 not found via pkg-config")
+        .include_paths
+}
+
 fn main() {
     // don't do anything when requesting docs
     if std::env::var("DOCS_RS").is_ok() {
@@ -117,25 +128,41 @@ fn main() {
 
         // Let pkg_config handle all other dependencies normally (Eigen)
         let mut includes = vec![flags.include];
-        includes.extend(
-            pkg_config::Config::new()
-                .probe("eigen3")
-                .unwrap()
-                .include_paths,
-        );
+        includes.extend(eigen_include_paths());
 
         // forward include paths
         let joined = std::env::join_paths(&includes).unwrap();
         println!("cargo:include={}", joined.to_string_lossy());
     } else {
-        let libint_root = PathBuf::from(std::env::var("OUT_DIR").unwrap()).join("libint-2.13.1");
-        println!("cargo:warning={}", libint_root.display());
+        // define directory in which libint should be cloned
+        // tracking `master` HEAD, not a release tag: v2.13.1 has an install bug where the
+        // compiled static libs never make it into CMAKE_INSTALL_PREFIX (fixed post-release,
+        // not yet in a tagged version - see libint-build/src/download.rs). Revisit once a
+        // release ships with the fix.
+        let libint_root = PathBuf::from(std::env::var("OUT_DIR").unwrap()).join("libint-master");
+        // Prevent downloading if the directory already exists.
+        // We assume that libint is already cloned.
         if !libint_root.exists() {
             let dir = libint_build::download(&PathBuf::from(std::env::var("OUT_DIR").unwrap()))
                 .expect("download failed");
             assert_eq!(libint_root, dir, "Download directory is not as expected");
         }
+
+        // build libint
         let config = libint_build::Configure::default();
-        config.build(libint_root);
+        let install_prefix = config.build(libint_root);
+        // forward path to lib (libint-build forces CMAKE_INSTALL_LIBDIR=lib)
+        println!(
+            "cargo:rustc-link-search=native={}",
+            install_prefix.join("lib").display()
+        );
+
+        // Let pkg_config handle all other dependencies normally (Eigen)
+        let mut includes = vec![install_prefix.join("include")];
+        includes.extend(eigen_include_paths());
+
+        // forward include paths
+        let joined = std::env::join_paths(&includes).unwrap();
+        println!("cargo:include={}", joined.to_string_lossy());
     }
 }

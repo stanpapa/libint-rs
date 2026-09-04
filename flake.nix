@@ -30,6 +30,7 @@
             pkg-config
             meson
             cmake
+            gmpxx
             ninja
             boost
             eigen
