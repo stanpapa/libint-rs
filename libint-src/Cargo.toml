@@ -17,6 +17,7 @@ system = []
 [dependencies]
 
 [build-dependencies]
+libint-build.workspace = true
 pkg-config.workspace = true
 semver.workspace = true
 thiserror.workspace = true

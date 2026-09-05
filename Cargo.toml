@@ -3,16 +3,21 @@ resolver = "3"
 members = ["libint", "libint-build", "libint-src", "libint-sys"]
 
 [workspace.dependencies]
+anyhow = "1.0.103"
 approx = "0.5.1"
 cxx = "1.0.194"
 cxx-build = "1.0.194"
+cmake = "0.1.58"
+flate2 = "1.1.9"
 libint-build = { version = "0.1.0", path = "libint-build" }
 libint-src = { version = "0.1.0", path = "libint-src" }
 libint-sys = { version = "0.1.0", path = "libint-sys" }
 ndarray = "0.17.2"
 pkg-config = "0.3.32"
 semver = "1.0.28"
+tar = "0.4.46"
 thiserror = "2.0.18"
+ureq = "3.3.0"
 
 [workspace.package]
 version = "0.1.0"
