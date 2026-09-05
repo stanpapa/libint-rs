@@ -45,7 +45,12 @@ impl Shell {
     }
 
     fn contractions(&self) -> impl Iterator<Item = Contraction<'_>> {
-        (0..self.ncontr()).map(|i| Contraction(ffi::at_contraction(self, i)))
+        (0..self.ncontr()).map(|i| {
+            Contraction(
+                ffi::at_contraction(self, i)
+                    .unwrap_or_else(|e| panic!("contraction index {i} out of bounds: {e}")),
+            )
+        })
     }
 
     fn origin(&self) -> [f64; 3] {

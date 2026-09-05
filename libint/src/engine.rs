@@ -135,7 +135,7 @@ H  -0.7920   0.0000  -0.4973
 H   0.7920   0.0000  -0.4973
     ";
         let atoms = crate::atom::read_dotxyz_str(xyz).unwrap();
-        let basis = BasisSet::new("def2-SVP", &atoms);
+        let basis = BasisSet::new("def2-SVP", &atoms).unwrap();
         initialize(true);
         let mut engine = Engine::new(Operator::Overlap, basis.max_nprim(), basis.max_l(), 0);
         let overlap = engine.onebody(&basis);
@@ -154,7 +154,7 @@ H   0.7920   0.0000  -0.4973
     H   0.7920   0.0000  -0.4973
         ";
         let atoms = crate::atom::read_dotxyz_str(xyz).unwrap();
-        let basis = BasisSet::new("def2-SVP", &atoms);
+        let basis = BasisSet::new("def2-SVP", &atoms).unwrap();
         initialize(true);
         let mut engine = Engine::new(Operator::Emultipole1, basis.max_nprim(), basis.max_l(), 0);
         let dipole = engine.onebody(&basis);

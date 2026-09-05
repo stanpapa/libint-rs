@@ -16,9 +16,14 @@ impl Deref for BasisSet {
 }
 
 impl BasisSet {
-    pub fn new(name: &str, atoms: &[Atom]) -> Self {
+    /// # Errors
+    ///
+    /// Returns an error if `name` does not match a known basis set.
+    pub fn new(name: &str, atoms: &[Atom]) -> Result<Self, cxx::Exception> {
         let ptrs = atoms.iter().map(Atom::as_ptr).collect::<Vec<_>>();
-        Self(unsafe { ffi::basis(name, ptrs.as_ptr(), ptrs.len()) })
+        Ok(Self(unsafe {
+            ffi::basis(name, ptrs.as_ptr(), ptrs.len())?
+        }))
     }
 
     /// if `false` use Cartesian Gaussians
@@ -36,8 +41,11 @@ impl BasisSet {
         self.len() == 0
     }
 
+    /// # Panics
+    ///
+    /// Panics if `i` is out of bounds.
     pub fn at(&self, i: usize) -> Shell {
-        Shell::from(ffi::at(self, i))
+        Shell::from(ffi::at(self, i).unwrap_or_else(|e| panic!("shell index {i} out of bounds: {e}")))
     }
 
     pub fn shells(&self) -> Vec<Shell> {
@@ -96,10 +104,24 @@ H  -0.7920   0.0000  -0.4973
 H   0.7920   0.0000  -0.4973
     ";
         let atoms = crate::atom::read_dotxyz_str(xyz).unwrap();
-        let basis = super::BasisSet::new("def2-SVP", &atoms);
+        let basis = super::BasisSet::new("def2-SVP", &atoms).unwrap();
         assert_eq!(basis.len(), 12);
         assert_eq!(basis.nbf(), 24);
         assert_eq!(basis.max_nprim(), 5);
         assert_eq!(basis.max_l(), 2);
+    }
+
+    #[test]
+    fn unknown_name_errors() {
+        let atoms = vec![crate::Atom::new(1, 0., 0., 0.)];
+        assert!(super::BasisSet::new("not-a-real-basis-set", &atoms).is_err());
+    }
+
+    #[test]
+    #[should_panic(expected = "shell index 1000 out of bounds")]
+    fn at_out_of_bounds_panics() {
+        let atoms = vec![crate::Atom::new(1, 0., 0., 0.)];
+        let basis = super::BasisSet::new("def2-SVP", &atoms).unwrap();
+        basis.at(1000);
     }
 }

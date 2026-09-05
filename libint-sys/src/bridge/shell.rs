@@ -16,8 +16,11 @@ pub mod ffi {
 
         #[must_use]
         fn alpha(shell: &Shell) -> Vec<f64>;
+        /// # Errors
+        ///
+        /// Returns an error if `i` is out of bounds.
         #[must_use]
-        fn at_contraction(shell: &Shell, i: usize) -> &Contraction;
+        fn at_contraction(shell: &Shell, i: usize) -> Result<&Contraction>;
         #[must_use]
         fn O(shell: &Shell) -> [f64; 3];
         #[must_use]

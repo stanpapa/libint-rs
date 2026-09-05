@@ -14,8 +14,16 @@ pub mod ffi {
         ///
         /// Make sure that `atoms` is not constructed with dangling pointers.
         /// This leads to C++ interpreting the pointers as garbage.
+        ///
+        /// # Errors
+        ///
+        /// Returns an error if `name` does not match a known basis set.
         #[must_use]
-        unsafe fn basis(name: &str, atoms: *const *const Atom, n: usize) -> UniquePtr<BasisSet>;
+        unsafe fn basis(
+            name: &str,
+            atoms: *const *const Atom,
+            n: usize,
+        ) -> Result<UniquePtr<BasisSet>>;
 
         fn set_pure(basis: Pin<&mut BasisSet>, solid: bool);
 
@@ -27,6 +35,9 @@ pub mod ffi {
         fn max_l(basis: &BasisSet) -> usize;
         fn shell2bf(basis: &BasisSet) -> &CxxVector<usize>;
 
-        fn at(basis: &BasisSet, i: usize) -> UniquePtr<Shell>;
+        /// # Errors
+        ///
+        /// Returns an error if `i` is out of bounds.
+        fn at(basis: &BasisSet, i: usize) -> Result<UniquePtr<Shell>>;
     }
 }

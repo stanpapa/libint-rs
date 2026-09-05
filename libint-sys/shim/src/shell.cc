@@ -15,7 +15,7 @@ rust::Vec<double> alpha(const Shell &shell) {
 }
 
 const Contraction &at_contraction(const Shell &shell, std::size_t i) {
-  return shell.contr[i];
+  return shell.contr.at(i);
 }
 
 std::array<double, 3> O(const Shell &shell) { return shell.O; }

@@ -15,8 +15,10 @@ std::unique_ptr<BasisSet> basis(rust::Str name, const Atom *const *atoms,
     tmp.push_back(*a);
   }
 
-  // construct `BasisSet` and return
-  return std::make_unique<BasisSet>(s, tmp);
+  // construct `BasisSet` and return; throw_if_no_match=true so an unknown
+  // basis-set name surfaces as an error instead of silently producing a
+  // partial/empty basis.
+  return std::make_unique<BasisSet>(s, tmp, /*throw_if_no_match=*/true);
 }
 
 void set_pure(BasisSet &basis, bool solid) { basis.set_pure(solid); }
@@ -34,6 +36,6 @@ const std::vector<std::size_t> &shell2bf(const BasisSet &basis) {
 }
 
 std::unique_ptr<Shell> at(const BasisSet &basis, std::size_t i) {
-  return std::make_unique<Shell>(basis[i]);
+  return std::make_unique<Shell>(basis.at(i));
 }
 } // namespace libint2
